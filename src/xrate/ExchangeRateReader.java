@@ -1,11 +1,35 @@
 package xrate;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Node;
+
 /**
  * Provide access to basic currency exchange rate services.
  * 
  * @author PUT YOUR TEAM NAME HERE
  */
 public class ExchangeRateReader {
+
+
+    public URL url;
+    public String baseUrlString;
+    public InputStream xmlStream;
+    public static void main(String[] args){
+
+    }
 
     /**
      * Construct an exchange rate reader using the given base URL. All requests
@@ -19,7 +43,18 @@ public class ExchangeRateReader {
      *            the base URL for requests
      */
     public ExchangeRateReader(String baseURL) {
-        // TODO Your code here
+        //try {
+            baseUrlString = baseURL;
+            /*this.url = new URL(baseURL);
+            this.xmlStream = url.openStream();
+        }
+        catch(MalformedURLException e){
+            e.printStackTrace();
+        }
+        catch (IOException io){
+            io.printStackTrace();
+        }*/
+
     }
 
     /**
@@ -40,7 +75,39 @@ public class ExchangeRateReader {
      * @throws SAXException
      */
     public float getExchangeRate(String currencyCode, int year, int month, int day) {
-        // TODO Your code here
+        String getExchangeURLString = baseUrlString +=year +"/"+month+"/"+day+".xml";
+        try {
+            this.url = new URL(getExchangeURLString);
+            this.xmlStream = url.openStream();
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.parse(new URL(getExchangeURLString).openStream());
+            NodeList nodeList = doc.getElementsByTagName("basecurrency");
+            Element CurCurrency = (Element) nodeList.item(0);
+            for(int i = 0; i < nodeList.getLength(); i++){
+                CurCurrency = (Element) nodeList.item(i);
+                // check for matching currency code by comparing the child node of current node (currency code),
+                // with the currencyCode argument.
+                NodeList children = CurCurrency.getChildNodes();
+                if(getCurrencyCode, ){
+                    break;
+                }
+            }
+        }
+        catch(MalformedURLException e){
+            e.printStackTrace();
+        }
+        catch(IOException io){
+            io.printStackTrace();
+        }
+        catch(ParserConfigurationException pe){
+            pe.printStackTrace();
+        }
+        catch(SAXException SAX){
+            SAX.printStackTrace();
+        }
+        //String url = "http://api.finance.xaviermedia.com/api/" + year + "/"+month+"/"+day+".xml";
+
         throw new UnsupportedOperationException();
     }
 
