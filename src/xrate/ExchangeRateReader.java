@@ -28,13 +28,7 @@ public class ExchangeRateReader {
     public URL url;
     public String baseUrlString;
     public InputStream xmlStream;
-    public static void main(String[] args){
-        String NICS_DUMMY_DATA_URL = "http://www.morris.umn.edu/~mcphee/ExchangeRateData/";
-        ExchangeRateReader xrReader = new ExchangeRateReader(NICS_DUMMY_DATA_URL);
-        System.out.println(xrReader.getExchangeRate("GBP", 2009, 11, 12));
-        //System.out.println(xrReader.getExchangeRate("PLN","USD",2009,11,12));
 
-    }
 
     /**
      * Construct an exchange rate reader using the given base URL. All requests
@@ -70,6 +64,8 @@ public class ExchangeRateReader {
      * @throws SAXException
      */
     public float getExchangeRate(String currencyCode, int year, int month, int day) {
+
+        //make everything strings so that 0 can be appended in front of single digits
         String monthStr = ""+month;
         String dayStr = ""+day;
         String yearStr = ""+year;
@@ -86,19 +82,21 @@ public class ExchangeRateReader {
         try {
             this.url = new URL(getExchangeURLString);
             this.xmlStream = url.openStream();
+            // convert url to document so that node related operations can be executed.
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(new URL(getExchangeURLString).openStream());
             doc.getDocumentElement().normalize();
             NodeList nodeList = doc.getElementsByTagName("fx");
-            Node CurCurrency =  nodeList.item(0);
+            Node CurCurrency;
+            // iterate through every element in the node list to find the correct currency code,
             for(int i = 0; i < nodeList.getLength(); i++){
                 CurCurrency = nodeList.item(i);
                 // check for matching currency code by comparing the child node of current node (currency code),
                 // with the currencyCode argument.
                 NodeList children = CurCurrency.getChildNodes();
                 //System.out.println(CurCurrency);
-
+                //if that code has been found, break from the loop and return the currency rate.
                 if(children.item(1).getTextContent().equals(currencyCode)) {
 
                     toReturn = Float.parseFloat(children.item(3).getTextContent());
@@ -119,9 +117,6 @@ public class ExchangeRateReader {
         catch(SAXException SAX){
             SAX.printStackTrace();
         }
-        //String url = "http://api.finance.xaviermedia.com/api/" + year + "/"+month+"/"+day+".xml";
-
-        //throw new UnsupportedOperationException();
         return toReturn;
     }
 
@@ -145,13 +140,13 @@ public class ExchangeRateReader {
      * @throws SAXException
      */
     public float getExchangeRate(String fromCurrency, String toCurrency, int year, int month, int day) throws ParserConfigurationException,SAXException {
-
+        //call the former method twice, and return the quotient
         float start = this.getExchangeRate(fromCurrency, year, month, day);
         float end = this.getExchangeRate(toCurrency, year, month, day);
         if(end<=0.0001){
             return start;
         }
-        
+
         return start/end;
         }
 
